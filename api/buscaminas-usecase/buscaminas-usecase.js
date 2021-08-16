@@ -1,8 +1,9 @@
-
-
 const crearMatriz = (tamannio) => {
     let matriz = []
-    for
+    for(let i=0; i<tamannio; i++){
+        matriz.push(new Array(tamannio))
+    }
+    console.log(matriz)
 }
 
-export default module;
+module.exports = {crearMatriz}

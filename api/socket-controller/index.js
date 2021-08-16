@@ -6,7 +6,14 @@ const {Server} = require('socket.io')
 const io = new Server(server)
 const buscaminasUsecase = require('../buscaminas-usecase/buscaminas-usecase')
 
-
 io.on('connection', (socket)=>{
-    return buscaminasUsecase
+    socket.on('play', (tamannio) => {
+        return buscaminasUsecase.crearMatriz(tamannio);
+    })
 })
+
+server.listen(3000, () => {
+    buscaminasUsecase.crearMatriz(3);
+    console.log('listening on *:3000');
+  });
+  
