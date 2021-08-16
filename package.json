@@ -1,0 +1,23 @@
+{
+  "name": "buscaminas",
+  "version": "1.0.0",
+  "description": "proyecto de buscaminas usando: react, node, webworkers y socket.io",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuanPrat/buscaminas.git"
+  },
+  "author": "juan jose y dctor uribe",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JuanPrat/buscaminas/issues"
+  },
+  "homepage": "https://github.com/JuanPrat/buscaminas#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.1.3"
+  }
+}
