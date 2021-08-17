@@ -25,7 +25,6 @@ const crearMatriz = (filas, columnas, cantidadBombas) => {
             matriz = bombasAlrededor(matriz, i, j, filas, columnas)
         }
     }
-    console.log(matriz)
     return matriz;
 }
 
