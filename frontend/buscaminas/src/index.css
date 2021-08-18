@@ -22,3 +22,10 @@ code {
 .flexboxContainer {
   display: flex;
 }
+
+.flag-icon {
+  background-color: red;
+  border-radius: 50%;
+  height: 20px;
+  width: 20px;
+}
