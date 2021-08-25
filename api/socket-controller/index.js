@@ -3,17 +3,19 @@ const http = require("http");
 const app = express();
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+const buscaminasUsecase = require("../buscaminas-usecase/buscaminas-usecase");
 const io = require("socket.io")(server, {
   cors: {
     origin: "http://localhost:3000",
   }
 });
 const { start, job } = require("microjob");
+
 io.on("connection", (socket) => {
   console.log("user connected")
   socket.on('play', async (req, res) => {
     const { filas, columnas, cantidadBombas } = req;
-    const matriz = await job(({ filas, columnas, cantidadBombas }) => {
+    const matrizJuego = await job(({ filas, columnas, cantidadBombas }) => {
       const buscaminasUsecase = require("../buscaminas-usecase/buscaminas-usecase");
       return buscaminasUsecase.crearMatriz(filas, columnas, cantidadBombas)
     }, {
@@ -23,7 +25,7 @@ io.on("connection", (socket) => {
         cantidadBombas: cantidadBombas
       }
     })
-    socket.emit('playReturn', matriz)
+    socket.emit('playReturn', {matrizJuego, cantidadBombas})
   })
 
 });

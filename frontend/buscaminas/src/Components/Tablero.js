@@ -1,17 +1,38 @@
-import React, { useState } from "react";
-const Tablero = ({ socket }) => {
+import React, { useEffect, useState } from "react";
 
-  const [matriz, setMatriz] = useState([])
+const Tablero = ({ socket }) => {
+  const [matriz, setMatriz] = useState([]);
+  const [cantidadBombas, setCantidadBombas] = useState(-1)
+
+  useEffect(() => {
+    if (cantidadBombas === 0) {
+      window.alert("HAZ GANADOOOOOO!")
+    }
+  }, [cantidadBombas])
+
+  socket.on("playReturn", (objeto) => {
+    setCantidadBombas(-1)
+    setMatriz([]);
+    const { matrizJuego, cantidadBombas } = objeto
+    setCantidadBombas(cantidadBombas)
+    setMatriz(matrizJuego);
+  });
 
   function generarColumna(matriz, i) {
     let array = [];
     for (let j = 0; j < matriz[0].length; j++) {
       array.push(
-        <section className="cuadro" value={i + "," + j} id={""+i+j} onClick={(e) => {
-          pulsar(e);
-        }} onContextMenu={(e) => {
-          derecho(e);
-        }}></section>
+        <section
+          className="cuadro"
+          value={i + "," + j}
+          id={"" + i + j}
+          onClick={(e) => {
+            pulsar(e);
+          }}
+          onContextMenu={(e) => {
+            derecho(e);
+          }}
+        ></section>
       );
     }
     return array;
@@ -29,88 +50,86 @@ const Tablero = ({ socket }) => {
 
   const pulsar = (e) => {
     e.preventDefault();
-    let posicionMatriz = e.target.attributes[1].value;
-    posicionMatriz = posicionMatriz.split(",")
-    const fila = parseInt(posicionMatriz[0])
-    const columna = parseInt(posicionMatriz[1])
     debugger
-    if (matriz[fila][columna] === "BOOM") {
-      window.alert("AHI HAY UNA BOMBAAAAAAAAAAAAAAAAAAA ! D:")
+    if (e.target.className !== 'flag-icon') {
+      let posicionMatriz = e.target.attributes[1].value;
+      posicionMatriz = posicionMatriz.split(",");
+      const fila = parseInt(posicionMatriz[0]);
+      const columna = parseInt(posicionMatriz[1]);
+      if (matriz[fila][columna] === "BOOM") {
+        window.alert("AHI HAY UNA BOMBAAAAAAAAAAAAAAAAAAA ! D:");
+      } else {
+        destaparCasilla(fila, columna, matriz.length, matriz[0].length);
+      }
     }
-    else {
-      debugger
-      destaparCasilla(fila, columna, matriz.length, matriz[0].length)
-    }
-
   };
 
   function destaparCasilla(fila, columna, filas, columnas) {
-    console.log("destapamos la casilla con fila " + fila + " y columna " + columna);
-
     //si la casilla esta dentro del tablero
     if (fila > -1 && fila < filas && columna > -1 && columna < columnas) {
-      //si no es bomba
-      if (matriz[fila][columna] !== "BOOM") {
-        if(matriz[fila][columna] !== "0" && matriz[fila][columna] !== 0  ){
-          debugger
-          var cuadro = document.getElementById(""+fila+columna);
-          debugger
-          cuadro.innerText = matriz[fila][columna]
-          return;
+      //si la casilla está descubierta
+      let campo = document.getElementById("" + fila + columna);
+      if (!campo.classList.contains('destapado')) {
+        //si no es bomba
+        if (matriz[fila][columna] !== "BOOM") {
+          if (matriz[fila][columna] !== 0) {
+            var cuadro = document.getElementById("" + fila + columna);
+            cuadro.innerText = matriz[fila][columna];
+            cuadro.classList.add('destapado')
+          }
+          // y tiene 0 minas alrededor, destapamos las casillas contiguas
+          if (matriz[fila][columna] == 0) {
+            var cuadro = document.getElementById("" + fila + columna);
+            cuadro.innerText = "0";
+            cuadro.classList.add('destapado')
+            destaparCasilla(fila - 1, columna - 1, filas, columnas, matriz);
+            destaparCasilla(fila - 1, columna, filas, columnas, matriz);
+            destaparCasilla(fila - 1, columna + 1, filas, columnas, matriz);
+            destaparCasilla(fila, columna - 1, filas, columnas, matriz);
+            destaparCasilla(fila + 1, columna - 1, filas, columnas, matriz);
+            destaparCasilla(fila, columna + 1, filas, columnas, matriz);
+            destaparCasilla(fila + 1, columna, filas, columnas, matriz);
+            destaparCasilla(fila + 1, columna + 1, filas, columnas, matriz);
+          }
         }
-        // y tiene 0 minas alrededor, destapamos las casillas contiguas
-        else if (matriz[fila][columna] == "0" && matriz[fila][columna] == 0) {
-          debugger
-          var cuadro = document.getElementById(""+fila+columna);
-          cuadro.innerText = "0"
-          setTimeout(destaparCasilla(fila - 1, columna - 1, filas, columnas, matriz), 0)
-          setTimeout(destaparCasilla(fila - 1, columna,  filas, columnas, matriz), 0)
-          setTimeout(destaparCasilla(fila - 1, columna + 1, filas, columnas, matriz), 0)
-          setTimeout(destaparCasilla(fila, columna - 1, filas, columnas, matriz), 0)
-          setTimeout(destaparCasilla(fila, columna + 1, filas, columnas, matriz), 0)
-          setTimeout(destaparCasilla(fila + 1, columna - 1, filas, columnas, matriz), 0)
-          setTimeout(destaparCasilla(fila + 1, columna, filas, columnas, matriz), 0)
-          setTimeout(destaparCasilla(fila + 1, columna + 1, filas, columnas, matriz), 0)
-          return;
-        }
-        return;
+      }
     }
-    return;
   }
-}
 
-const derecho = (e) => {
-  e.preventDefault();
-  if (e.type === "contextmenu") {
-    console.log(e);
-
-    //obtenemos el elemento que ha disparado el evento
-    const casilla = e.currentTarget;
-    const casillaChildren = casilla.children;
-    debugger
-    if (casillaChildren != [] && !casillaChildren[0]) {
-      debugger
-      let divBandera = document.createElement("div")
-      divBandera.classList.add("flag-icon")
-      casilla.appendChild(divBandera)
-    }
-    else {
-      debugger
-      casilla.removeChild(casilla.lastElementChild)
-    }
-
-    //detenemos el burbujeo del evento y su accion por defecto
-    e.stopPropagation();
+  const derecho = (e) => {
     e.preventDefault();
-  }
-  console.log("derecho");
-};
+    if (e.type === "contextmenu") {
+      console.log(e);
 
-socket.on('playReturn', (matrizNueva) => {
-  setMatriz(matrizNueva)
-})
+      //obtenemos el elemento que ha disparado el evento
+      const casilla = e.currentTarget;
+      const casillaChildren = casilla.children;
+      let posicionMatriz = e.target.attributes[1].value;
+      posicionMatriz = posicionMatriz.split(",");
+      if (casillaChildren != [] && !casillaChildren[0]) {
+        if (matriz[posicionMatriz[0]][posicionMatriz[1]] === "BOOM") {
+          setCantidadBombas(cantidadBombas - 1)
+        }
+        let divBandera = document.createElement("div");
+        divBandera.classList.add("flag-icon");
+        casilla.appendChild(divBandera);
+      } else {
+        if (matriz[posicionMatriz[0]][posicionMatriz[1]] === "BOOM") {
+          setCantidadBombas(cantidadBombas + 1)
+        }
+        casilla.removeChild(casilla.lastElementChild);
+      }
 
-return <div>{generarTablero(matriz)}</div>;
+      //detenemos el burbujeo del evento y su accion por defecto
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    console.log("derecho");
+  };
+
+
+
+  return <div className="tablero-container"><div className="tablero">{generarTablero(matriz)}</div></div>;
 };
 
 export default Tablero;
